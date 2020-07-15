@@ -82,6 +82,7 @@ class CommWorker:
                         if data is None:
                             continue
                         client_queue.put({'data': data})
+                        break
                     except FramingDecodeError as e:
                         log.warning(str(e))
 
