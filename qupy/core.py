@@ -1,7 +1,12 @@
 import threading
 import queue
+import logging
 
 from .errors import CommTimeoutError, CommClientError
+from .interface.errors import InterfaceIOError
+from .framing.errors import FramingDecodeError
+
+log = logging.getLogger()
 
 
 class CommWorker:
@@ -54,15 +59,30 @@ class CommWorker:
             client_queue = self._client_queues.get(client_id)
 
             tx_bytes = self.framing.encode_frame(data)
-            self.interface.write(tx_bytes)
+
+            try:
+                self.interface.write(tx_bytes)
+            except InterfaceIOError as e:
+                log.error(str(e))
+                continue
 
             while True:
-                rx_bytes = self.interface.read()
+                try:
+                    rx_bytes = self.interface.read()
+                except InterfaceIOError as e:
+                    log.error(str(e))
+                    break
+
                 if rx_bytes is None:
                     client_queue.put({'error': CommTimeoutError()})
                     break
                 for byte in rx_bytes:
-                    data = self.framing.decode_frame(byte)
-                    if data is None:
-                        continue
-                    client_queue.put({'data': data})
+                    try:
+                        data = self.framing.decode_frame(byte)
+                        if data is None:
+                            continue
+                        client_queue.put({'data': data})
+                    except FramingDecodeError as e:
+                        log.warning(str(e))
+
+                    

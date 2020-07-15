@@ -1,4 +1,5 @@
 from . import AbstractFraming
+from .errors import FramingDecodeError
 
 
 class Slip(AbstractFraming):
@@ -48,10 +49,13 @@ class Slip(AbstractFraming):
             if byte == Slip.BYTE_START:
                 self.buf = bytearray()
                 self.state = Slip.STATUS_DATABYTE
+            else:
+                raise FramingDecodeError('Unexpected data byte before frame start')
 
         elif self.state == Slip.STATUS_DATABYTE:
             if byte == Slip.BYTE_START:
                 self.buf = bytearray()
+                raise FramingDecodeError('Unexpected start byte before frame end')
 
             elif byte == Slip.BYTE_END:
                 self.state = Slip.STATUS_START
@@ -78,5 +82,6 @@ class Slip(AbstractFraming):
                 
             else:
                 self.state = Slip.STATUS_START
+                raise FramingDecodeError('Unexpected escaped byte')
 
         return ret

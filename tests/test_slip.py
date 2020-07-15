@@ -1,6 +1,7 @@
 import unittest
 
 from qupy.framing.slip import Slip
+from qupy.framing.errors import FramingDecodeError
 
 
 class TestSlipFraming(unittest.TestCase):
@@ -40,17 +41,18 @@ class TestSlipFraming(unittest.TestCase):
 
         self.assertEqual(self.framing.decode_frame(0xC0), None)
         self.assertEqual(self.framing.decode_frame(0x01), None)
-        self.assertEqual(self.framing.decode_frame(0xC0), None)
+        with self.assertRaises(FramingDecodeError):
+            self.framing.decode_frame(0xC0)
         self.assertEqual(self.framing.decode_frame(0x02), None)
         self.assertEqual(self.framing.decode_frame(0x03), None)
         self.assertEqual(self.framing.decode_frame(0xC1), b'\x02\x03')
 
         self.assertEqual(self.framing.decode_frame(0xC0), None)
         self.assertEqual(self.framing.decode_frame(0xDB), None)
-        self.assertEqual(self.framing.decode_frame(0x01), None)
-        self.assertEqual(self.framing.decode_frame(0x02), None)
-        self.assertEqual(self.framing.decode_frame(0x03), None)
-        self.assertEqual(self.framing.decode_frame(0xC1), None)
+        with self.assertRaises(FramingDecodeError):
+            self.framing.decode_frame(0x01)
+        with self.assertRaises(FramingDecodeError):
+            self.framing.decode_frame(0x02)
 
         self.assertEqual(self.framing.decode_frame(0xC0), None)
         self.assertEqual(self.framing.decode_frame(0x01), None)
