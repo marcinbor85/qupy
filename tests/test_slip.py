@@ -1,11 +1,12 @@
 import unittest
 
-from qupy.framing import slip
+from qupy.framing.slip import Slip
+
 
 class TestSlipFraming(unittest.TestCase):
 
     def setUp(self):
-        self.framing = slip.Slip()
+        self.framing = Slip()
 
     def test_encode(self):
         self.assertEqual(self.framing.encode_frame(b''), b'\xc0\xc1')
