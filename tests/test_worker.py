@@ -53,5 +53,11 @@ class TestSlipFraming(unittest.TestCase):
             rx_data = self.comm.send_recv(tx_data)
         self.assertEqual(self.interface.data, self.framing.encode_frame(tx_data))
 
+    def test_send_recv_json(self):
+        self.interface.enabled = True
+        tx_data = {"str": "test", "obj": {"list": [1, 2, 3], "id": 1}}
+        rx_data = self.comm.send_recv_json(tx_data)
+        self.assertEqual(rx_data, tx_data)
+
 if __name__ == '__main__':
     unittest.main()

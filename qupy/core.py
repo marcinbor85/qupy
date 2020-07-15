@@ -1,6 +1,7 @@
 import threading
 import queue
 import logging
+import json
 
 from .errors import CommTimeoutError, CommClientError
 from .interface.errors import InterfaceIOError
@@ -9,7 +10,21 @@ from .framing.errors import FramingDecodeError
 log = logging.getLogger()
 
 
-class CommWorker:
+class JsonHelper:
+    def send_json(self, data, client_id=None):
+        tx_bytes = bytes(json.dumps(data), 'utf-8')
+        self.send(tx_bytes, client_id=client_id)
+    
+    def recv_json(self, client_id=None):
+        rx_bytes = self.recv(client_id=client_id)
+        return json.loads(rx_bytes)
+
+    def send_recv_json(self, data, client_id=None):
+        self.send_json(data, client_id=client_id)
+        return self.recv_json(client_id=client_id)
+
+
+class CommWorker(JsonHelper):
     def __init__(self, interface, framing):
         self.interface = interface
         self.framing = framing

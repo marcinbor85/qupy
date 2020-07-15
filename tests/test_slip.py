@@ -1,4 +1,5 @@
 import unittest
+import json
 
 from qupy.framing.slip import Slip
 from qupy.framing.errors import FramingDecodeError
@@ -57,6 +58,15 @@ class TestSlipFraming(unittest.TestCase):
         self.assertEqual(self.framing.decode_frame(0xC0), None)
         self.assertEqual(self.framing.decode_frame(0x01), None)
         self.assertEqual(self.framing.decode_frame(0xC1), b'\x01')
+
+    def test_json(self):
+        tx_data = {'str': 'test', 'obj': {'list': [1, 2, 3], 'id': 1}}
+        tx_bytes = bytes(json.dumps(tx_data), 'utf-8')
+        frame = self.framing.encode_frame(tx_bytes)
+        for b in frame:
+            r = self.framing.decode_frame(b)
+        rx_data = json.loads(r)
+        self.assertEqual(tx_data, rx_data)
 
 if __name__ == '__main__':
     unittest.main()
