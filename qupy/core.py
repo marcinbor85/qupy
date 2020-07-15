@@ -49,6 +49,10 @@ class CommWorker:
             raise error
         data = response.get('data')
         return data
+
+    def send_recv(self, data, client_id=None):
+        self.send(data, client_id=client_id)
+        return self.recv(client_id=client_id)
     
     def _worker(self):
         while True:
