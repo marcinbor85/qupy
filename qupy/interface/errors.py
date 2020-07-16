@@ -3,3 +3,6 @@ class InterfaceError(Exception):
 
 class InterfaceIOError(InterfaceError):
     pass
+
+class InterfaceTimeoutError(InterfaceError):
+    pass

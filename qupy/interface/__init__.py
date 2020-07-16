@@ -1,4 +1,3 @@
-
 class AbstractInterface:
     def read(self):
         raise NotImplementedError()
