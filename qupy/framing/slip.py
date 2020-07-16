@@ -1,5 +1,5 @@
-from . import AbstractFraming
-from .errors import FramingDecodeError
+from qupy.framing import AbstractFraming
+from qupy.framing.errors import FramingDecodeError
 
 
 class Slip(AbstractFraming):
@@ -15,10 +15,13 @@ class Slip(AbstractFraming):
     STATUS_ESCAPE   = 2
         
     def __init__(self):
+        self.reset()
+    
+    def reset(self):
         self.state = Slip.STATUS_START
         self.buf = bytearray()
 
-    def encode_frame(self, bytes_buf):
+    def encode_frame(self, bytes_buf: bytes):
         ret = bytearray()
         ret.append(Slip.BYTE_START)
 
