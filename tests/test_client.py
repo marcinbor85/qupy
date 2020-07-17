@@ -8,7 +8,7 @@ from qupy.comm.errors import CommTimeoutError
 from .common import EchoInterface
 
 
-class TestSlipFraming(unittest.TestCase):
+class TestCommClient(unittest.TestCase):
 
     def setUp(self):
         self.framing = Slip()
