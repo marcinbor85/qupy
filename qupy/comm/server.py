@@ -3,68 +3,79 @@ import queue
 import logging
 
 from qupy.comm import common
-from qupy.comm.errors import CommTimeoutError, CommClientError
+from qupy.comm.common import CommBase
 
-from qupy.interface.errors import InterfaceIOError
+from qupy.interface.errors import InterfaceIOError, InterfaceTimeoutError
 
 from qupy.framing.errors import FramingDecodeError
 
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
-class CommServer:
+class CommServer(CommBase):
     def __init__(self, interface, framing):
-        self.interface = interface
-        self.framing = framing
+        super().__init__(interface, framing)
 
+    def _before_worker_start(self):
+        self._rx_queue = queue.Queue()
         self._tx_queue = queue.Queue()
-        self._client_rx_queues = {}
 
-        self.register_client(None)
-
-    def register_client(self, client_id):
-        self._client_rx_queues.setdefault(client_id, queue.Queue())
-
-    def start(self):
-        self._thread = threading.Thread(target=self._worker)
-        self._thread.setDaemon(True)
-        self._thread.start()
+    def recv(self, data_format='binary'):
+        return self._recv_from(self._rx_queue, data_format=data_format)
     
+    def send(self, message):
+        self._send_to(self._tx_queue, message)
+
     def _worker(self):
+            
+        self.framing.reset()
+        message = None
+
         while True:
-            request = self._tx_queue.get()
+            if self._is_stop():
+                return True
 
-            data = request.get('data')
-            client_id = request.get('client_id')
-            rx_queue = self._client_rx_queues.get(client_id)
+            log.debug('Waiting for data...')
+            try:
+                rx_bytes = self.interface.read()
+            except InterfaceTimeoutError as e:
+                continue
+            except InterfaceIOError as e:
+                log.error('RX error: {}'.format(str(e)))
+                self._rx_queue.put({'error': e})
+                return False
 
-            tx_bytes = self.framing.encode_frame(data)
+            message = self._parse_rx_bytes(rx_bytes)
+            if message is None:
+                continue
+
+            self._tx_queue = queue.Queue()
+
+            log.debug('RX message: {}'.format(str(message)))
+            self._rx_queue.put({'message': message})
+
+            response = None
+            while response is None:
+                if self._is_stop():
+                    return True
+                try:
+                    response = self._tx_queue.get(timeout=1.0)
+                except queue.Empty as e:
+                    log.warning('Request confirm timeout')
+
+            message = response.get('message')
+
+            tx_bytes = self.framing.encode_frame(message)
+            log.debug('TX message: {}'.format(str(message)))
 
             try:
                 self.interface.write(tx_bytes)
-            except InterfaceIOError as e:
-                log.error(str(e))
-                continue
+            except (InterfaceIOError, InterfaceTimeoutError) as e:
+                log.error('TX error: {}'.format(str(e)))
+                self._rx_queue.put({'error': e})
+                return False
+        
+        return False
 
-            self.framing.reset()
 
-            while True:
-                try:
-                    rx_bytes = self.interface.read()
-                except InterfaceIOError as e:
-                    log.error(str(e))
-                    break
-
-                if rx_bytes is None:
-                    rx_queue.put({'error': CommTimeoutError()})
-                    break
-                for byte in rx_bytes:
-                    try:
-                        data = self.framing.decode_frame(byte)
-                        if data is None:
-                            continue
-                        rx_queue.put({'data': data})
-                        break
-                    except FramingDecodeError as e:
-                        log.warning(str(e))
