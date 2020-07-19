@@ -3,7 +3,8 @@ import unittest
 from qupy.framing.slip import Slip
 
 from qupy.comm.client import CommClient
-from qupy.comm.errors import CommTimeoutError
+from qupy.comm.errors import CommError
+from qupy.interface.errors import InterfaceTimeoutError
 
 from .common import EchoInterface
 
@@ -32,7 +33,7 @@ class TestCommClient(unittest.TestCase):
     def test_recv_timeout(self):
         self.interface.enabled = False
         tx_data = b'\x01\x02\x03'
-        with self.assertRaises(CommTimeoutError):
+        with self.assertRaises(InterfaceTimeoutError):
             self.comm.send_recv(tx_data)
 
     def test_recv_format(self):
@@ -40,7 +41,7 @@ class TestCommClient(unittest.TestCase):
         tx_data = b'\x01\x02\x03'
         with self.assertRaises(TypeError):
             self.comm.send_recv(tx_data, data_format='unknown')
-        with self.assertRaises(CommTimeoutError):
+        with self.assertRaises(InterfaceTimeoutError):
             self.comm.recv()
 
     def test_send_recv_json(self):
