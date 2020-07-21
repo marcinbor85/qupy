@@ -36,6 +36,7 @@ class CommBase:
 
         self._stop_cond = threading.Condition()
         self._stop_flag = False
+        self._thread = None
     
     def _before_worker_start(self):
         pass
@@ -53,12 +54,17 @@ class CommBase:
             self._thread.start()
 
     def stop(self):
+        if self._thread is None:
+            log.warning('Already stopped')
+            return
+
         log.debug('Stopping...')
 
         self._stop_cond.acquire()
         self._stop_flag = True
         self._stop_cond.wait()
         self._stop_cond.release()
+        self._thread = None
     
     def send_recv(self, message, **kwargs):
         self.send(message, **kwargs)

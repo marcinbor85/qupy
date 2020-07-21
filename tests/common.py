@@ -14,7 +14,7 @@ class EchoInterface(AbstractInterface):
             raise InterfaceTimeoutError('echo interface timeout: interface disabled')
 
         try:
-            rx_char = self.queue.get_nowait()    
+            rx_char = self.queue.get_nowait()
         except queue.Empty:
             raise InterfaceTimeoutError('echo interface timeout: empty queue')
     

@@ -59,7 +59,8 @@ class CommServer(CommBase):
             while response is None:
                 if self._is_stop():
                     return True
-                try:
+                log.debug('Waiting for confirm request')
+                try:    
                     response = self._tx_queue.get(timeout=1.0)
                 except queue.Empty as e:
                     log.warning('Request confirm timeout')
