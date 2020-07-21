@@ -93,6 +93,9 @@ class TcpSocketServer(TcpSocketBase):
     def _close(self):
         self._connection.shutdown(socket.SHUT_RDWR)
         self._connection.close()
+    
+    def unbind(self):
+        self.sock.close()
 
     def bind(self, host: str=TcpSocketBase.DEFAULT_HOST, port: int=TcpSocketBase.DEFAULT_PORT):
 
