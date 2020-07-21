@@ -6,16 +6,17 @@ from qupy.interface.tcp import TcpSocketClient
 from qupy.interface.errors import InterfaceTimeoutError, InterfaceIOError, InterfaceError
 from qupy.comm.client import CommClient
 
+
 logging.basicConfig(level=logging.DEBUG)
 
+
 if __name__ == '__main__':
-    s = TcpSocketClient(timeout=2.0)
+    s = TcpSocketClient(timeout=1.0)
     f = Slip()
 
     c = CommClient(s, f)
 
     connect = True
-
     while True:
         
         if connect:
@@ -32,8 +33,7 @@ if __name__ == '__main__':
             d = c.send_recv('test')
             print('data:',d)
             if len(d) > 0 and d[0] == ord('p'):
-                c.stop()
-                s.close()
+                
                 break
         except InterfaceIOError as e:
             print('send/recv io error', str(e))
@@ -43,46 +43,5 @@ if __name__ == '__main__':
         except InterfaceTimeoutError as e:
             print('timeout')
 
-        
-
-
-    # s.connect()
-
-    # s.write(b'abc')
-
-    # s.close()
-
-    # while True:
-        
-    #     try:
-    #         s.connect()
-    #     except InterfaceError as e:
-    #         print('cannot connect')
-
-    #     s.listen()
-
-    #     while True:
-    #         try:
-    #             d = s.read()
-    #             s.write(d)
-    #         except InterfaceError as e:
-    #             break
-
-    #         print(d)
-
-    #     s.close()
-
-    #     time.sleep(1.0)
-
-    #     s.connect()
-
-    #     while True:
-    #         try:
-    #             d = s.read()
-    #             s.write(d)
-    #         except InterfaceError as e:
-    #             break
-
-    #         print(d)
-
-    #     s.close()
+    c.stop()
+    s.close()
