@@ -11,12 +11,12 @@ class EchoInterface(AbstractInterface):
 
     def read(self):
         if not self.enabled:
-            raise InterfaceTimeoutError()
+            raise InterfaceTimeoutError('echo interface timeout: interface disabled')
 
         try:
             rx_char = self.queue.get_nowait()    
         except queue.Empty:
-            raise InterfaceTimeoutError()
+            raise InterfaceTimeoutError('echo interface timeout: empty queue')
     
         return bytes([rx_char])
 

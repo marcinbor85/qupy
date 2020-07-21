@@ -16,6 +16,9 @@ class TestCommClient(unittest.TestCase):
         self.interface = EchoInterface()
         self.comm = CommClient(self.interface, self.framing)
         self.comm.start()
+    
+    def tearDown(self):
+        self.comm.stop()
 
     def test_send_and_recv(self):
         self.interface.enabled = True
@@ -41,8 +44,6 @@ class TestCommClient(unittest.TestCase):
         tx_data = b'\x01\x02\x03'
         with self.assertRaises(TypeError):
             self.comm.send_recv(tx_data, data_format='unknown')
-        with self.assertRaises(InterfaceTimeoutError):
-            self.comm.recv()
 
     def test_send_recv_json(self):
         self.interface.enabled = True

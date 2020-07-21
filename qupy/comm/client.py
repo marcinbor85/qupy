@@ -30,13 +30,13 @@ class CommClient(CommBase):
             self._tx_queue = queue.Queue()
             self._client_rx_queues[k] = queue.Queue()
     
-    def send(self, message, client_id=None):
+    def send(self, message, client_id=None, **kwargs):
         if client_id not in self._client_rx_queues:
             raise CommError('Client ID not registered')
 
         self._send_to(self._tx_queue, message, client_id=client_id)
 
-    def recv(self, client_id=None, data_format='binary'):
+    def recv(self, client_id=None, data_format='binary', **kwargs):
         rx_queue = self._client_rx_queues.get(client_id)
         if not rx_queue:
             raise CommError('Client ID not registered')

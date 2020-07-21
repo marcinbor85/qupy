@@ -21,10 +21,10 @@ class CommServer(CommBase):
         self._rx_queue = queue.Queue()
         self._tx_queue = queue.Queue()
 
-    def recv(self, data_format='binary'):
+    def recv(self, data_format='binary', **kwargs):
         return self._recv_from(self._rx_queue, data_format=data_format)
     
-    def send(self, message):
+    def send(self, message, **kwargs):
         self._send_to(self._tx_queue, message)
 
     def _worker(self):
