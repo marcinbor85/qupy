@@ -10,6 +10,8 @@ class TestSlipFraming(unittest.TestCase):
     def setUp(self):
         self.framing = Slip()
 
+        super().setUp()
+
     def test_encode(self):
         self.assertEqual(self.framing.encode_frame(b''), b'\xc0\xc1')
         self.assertEqual(self.framing.encode_frame(b'\x01\x02\x03'), b'\xc0\x01\x02\x03\xc1')

@@ -16,9 +16,13 @@ class TestCommClient(unittest.TestCase):
         self.interface = EchoInterface()
         self.comm = CommClient(self.interface, self.framing)
         self.comm.start()
+
+        super().setUp()
     
     def tearDown(self):
         self.comm.stop()
+
+        super().tearDown()
 
     def test_send_and_recv(self):
         self.interface.enabled = True
