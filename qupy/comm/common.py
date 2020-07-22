@@ -78,7 +78,7 @@ class CommBase:
         else:
             data_format = 'json'
 
-        frame_bytes = common.get_data_format_converter(data_format).get('encoder')(message)
+        frame_bytes = common.get_data_format_converter(data_format).get('encoder')(message) if message is not None else None
 
         request = dict(message=frame_bytes, **kwargs)
         tx_queue.put(request)

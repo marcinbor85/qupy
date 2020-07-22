@@ -66,6 +66,9 @@ class CommServer(CommBase):
                     log.warning('Request confirm timeout')
 
             message = response.get('message')
+            if message is None:
+                log.debug('Confirm without TX message')
+                continue
 
             tx_bytes = self.framing.encode_frame(message)
             log.debug('TX message: {}'.format(str(message)))
