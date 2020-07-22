@@ -15,6 +15,9 @@ class TestTcpInterface(unittest.TestCase):
 
         self.tcp_server.bind()
 
+        self.tcp_client.connect()
+        self.tcp_server.listen()
+
         super().setUp()
 
     def tearDown(self):
@@ -24,8 +27,6 @@ class TestTcpInterface(unittest.TestCase):
         super().tearDown()
 
     def test_txrx_client(self):
-        self.tcp_client.connect()
-        self.tcp_server.listen()
         
         tx_buf = bytes([i % 256 for i in range(4000)])
         
@@ -42,8 +43,6 @@ class TestTcpInterface(unittest.TestCase):
         self.tcp_client.close()
 
     def test_txrx_server(self):
-        self.tcp_client.connect()
-        self.tcp_server.listen()
 
         tx_buf = bytes([255 - i % 256 for i in range(4000)])
         
@@ -60,8 +59,6 @@ class TestTcpInterface(unittest.TestCase):
         self.tcp_client.close()
 
     def test_server_close(self):
-        self.tcp_client.connect()
-        self.tcp_server.listen()
 
         self.tcp_server.close()
 
@@ -71,8 +68,6 @@ class TestTcpInterface(unittest.TestCase):
         self.tcp_client.close()
     
     def test_client_close(self):
-        self.tcp_client.connect()
-        self.tcp_server.listen()
 
         self.tcp_client.close()
 
