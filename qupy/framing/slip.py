@@ -3,8 +3,8 @@ from qupy.framing.errors import FramingDecodeError
 
 
 class Slip(AbstractFraming):
-    BYTE_START         = ord('a')#0xC0
-    BYTE_END           = ord('q')#0xC1
+    BYTE_START         = 0xC0
+    BYTE_END           = 0xC1
     BYTE_ESCAPE        = 0xDB
     BYTE_ESCAPE_START  = 0xDC
     BYTE_ESCAPE_END    = 0xDD
