@@ -32,7 +32,7 @@ class TestCommServer(unittest.TestCase):
         self.interface.write(tx_data)
         rx_data = self.comm.recv()
         self.assertEqual(rx_data, tx_msg)
-        
+
         self.interface.enabled = False
         tx_msg = b'\x04\x05\x06'
         tx_data = self.framing.encode_frame(tx_msg)
@@ -55,6 +55,7 @@ class TestCommServer(unittest.TestCase):
         self.interface.write(tx_data)
         rx_data = self.comm.recv()
         self.assertEqual(rx_data, tx_msg)
+
         self.interface.enabled = False
         self.comm.send(None)
         rx_data = bytearray()
