@@ -29,14 +29,14 @@ if __name__ == '__main__':
             connect = False
             
         try:
-            print('send/recv...')
-            d = c.send_recv('test')
+            print('ask...')
+            d = c.ask('test')
             print('data:',d)
             if len(d) > 0 and d[0] == ord('p'):
                 
                 break
         except InterfaceIOError as e:
-            print('send/recv io error', str(e))
+            print('ask io error', str(e))
             c.stop()
             s.close()
             connect = True

@@ -46,7 +46,7 @@ class TestCommClient(unittest.TestCase):
         self.assertEqual(rx_msg, tx_msg)
 
         tx_msg = b'def'
-        self.comm_server.send(tx_msg)
+        self.comm_server.confirm(tx_msg)
         rx_msg = self.comm_client.recv()
         self.assertEqual(rx_msg, tx_msg)
         
@@ -56,7 +56,7 @@ class TestCommClient(unittest.TestCase):
         rx_msg = self.comm_server.recv()
         self.assertEqual(rx_msg, tx_msg)
 
-        self.comm_server.send(None)
+        self.comm_server.confirm(None)
 
 
 if __name__ == '__main__':

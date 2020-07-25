@@ -5,6 +5,7 @@ import logging
 from qupy.comm import common
 from qupy.interface import AbstractInterface
 from qupy.framing import AbstractFraming
+from qupy.framing.errors import FramingDecodeError
 
 log = logging.getLogger(__name__)
 
@@ -65,10 +66,6 @@ class CommBase:
         self._stop_cond.wait()
         self._stop_cond.release()
         self._thread = None
-    
-    def send_recv(self, message, **kwargs):
-        self.send(message, **kwargs)
-        return self.recv(**kwargs)
     
     def _send_to(self, tx_queue, message, **kwargs):
         if isinstance(message, bytes):

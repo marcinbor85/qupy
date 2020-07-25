@@ -33,7 +33,7 @@ if __name__ == '__main__':
             if len(d) > 0 and d[0] == ord('p'):
                 break
             elif len(d) > 0:
-                c.send(d)
+                c.confirm(d)
 
         except InterfaceIOError as e:
             print('receiving io error', str(e))

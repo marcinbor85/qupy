@@ -36,7 +36,7 @@ class TestCommServer(unittest.TestCase):
         self.interface.enabled = False
         tx_msg = b'\x04\x05\x06'
         tx_data = self.framing.encode_frame(tx_msg)
-        self.comm.send(tx_msg)
+        self.comm.confirm(tx_msg)
         rx_data = bytearray()
         time.sleep(1.0)
         self.comm.stop()
@@ -57,7 +57,7 @@ class TestCommServer(unittest.TestCase):
         self.assertEqual(rx_data, tx_msg)
 
         self.interface.enabled = False
-        self.comm.send(None)
+        self.comm.confirm(None)
         rx_data = bytearray()
         time.sleep(1.0)
         self.comm.stop()
