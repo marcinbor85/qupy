@@ -1,6 +1,5 @@
 import logging
 import socket
-import sys
 import threading
 
 from qupy.interface import AbstractInterface
