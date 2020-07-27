@@ -13,53 +13,117 @@ class TestSlipFraming(unittest.TestCase):
         super().setUp()
 
     def test_encode(self):
-        self.assertEqual(self.framing.encode_frame(b''), b'\xc0\xc1')
-        self.assertEqual(self.framing.encode_frame(b'\x01\x02\x03'), b'\xc0\x01\x02\x03\xc1')
-        self.assertEqual(self.framing.encode_frame(b'\xc0\x01\xc1\x02\xdb\xdc\xdd\xde\x03'), b'\xc0\xdb\xdc\x01\xdb\xdd\x02\xdb\xde\xdc\xdd\xde\x03\xc1')
+        self.assertEqual(self.framing.encode_frame(
+            bytes(
+                [
+                ]
+            )),
+            bytes(
+                [
+                    Slip.BYTE_START,
+                    Slip.BYTE_END
+                ]
+            )
+        )
+        self.assertEqual(self.framing.encode_frame(
+            bytes(
+                [
+                    0x01, 0x02, 0x03
+                ]
+            )),
+            bytes(
+                [
+                    Slip.BYTE_START,
+                    0x01, 0x02, 0x03,
+                    Slip.BYTE_END
+                ]
+            )
+        )
+        self.assertEqual(self.framing.encode_frame(
+            bytes(
+                [
+                    Slip.BYTE_START, 0x01, Slip.BYTE_END, 0x02,
+                    Slip.BYTE_ESCAPE, Slip.BYTE_ESCAPE_START, Slip.BYTE_ESCAPE_END, Slip.BYTE_ESCAPE_ESCAPE, 0x03
+                ]
+            )),
+            bytes(
+                [
+                    Slip.BYTE_START,
+                    Slip.BYTE_ESCAPE, Slip.BYTE_ESCAPE_START, 0x01, Slip.BYTE_ESCAPE, Slip.BYTE_ESCAPE_END, 0x02,
+                    Slip.BYTE_ESCAPE, Slip.BYTE_ESCAPE_ESCAPE, Slip.BYTE_ESCAPE_START, Slip.BYTE_ESCAPE_END, Slip.BYTE_ESCAPE_ESCAPE, 0x03,
+                    Slip.BYTE_END
+                ]
+            )
+        )
 
     def test_decode(self):
-        self.assertEqual(self.framing.decode_frame(0xC0), None)
-        self.assertEqual(self.framing.decode_frame(0xC1), b'')
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_START), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_END), b'')
 
-        self.assertEqual(self.framing.decode_frame(0xC0), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_START), None)
         self.assertEqual(self.framing.decode_frame(0x01), None)
         self.assertEqual(self.framing.decode_frame(0x02), None)
         self.assertEqual(self.framing.decode_frame(0x03), None)
-        self.assertEqual(self.framing.decode_frame(0xC1), b'\x01\x02\x03')
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_END),
+            bytes(
+                [
+                    0x01, 0x02, 0x03
+                ]
+            )
+        )
 
-        self.assertEqual(self.framing.decode_frame(0xC0), None)
-        self.assertEqual(self.framing.decode_frame(0xDB), None)
-        self.assertEqual(self.framing.decode_frame(0xDC), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_START), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE_START), None)
         self.assertEqual(self.framing.decode_frame(0x01), None)
-        self.assertEqual(self.framing.decode_frame(0xDB), None)
-        self.assertEqual(self.framing.decode_frame(0xDD), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE_END), None)
         self.assertEqual(self.framing.decode_frame(0x02), None)
-        self.assertEqual(self.framing.decode_frame(0xDB), None)
-        self.assertEqual(self.framing.decode_frame(0xDE), None)
-        self.assertEqual(self.framing.decode_frame(0xDC), None)
-        self.assertEqual(self.framing.decode_frame(0xDD), None)
-        self.assertEqual(self.framing.decode_frame(0xDE), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE_ESCAPE), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE_START), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE_END), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE_ESCAPE), None)
         self.assertEqual(self.framing.decode_frame(0x03), None)
-        self.assertEqual(self.framing.decode_frame(0xC1), b'\xc0\x01\xc1\x02\xdb\xdc\xdd\xde\x03')
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_END),
+            bytes(
+                [
+                    Slip.BYTE_START, 0x01, Slip.BYTE_END, 0x02,
+                    Slip.BYTE_ESCAPE, Slip.BYTE_ESCAPE_START, Slip.BYTE_ESCAPE_END, Slip.BYTE_ESCAPE_ESCAPE, 0x03
+                ]
+            )
+        )
 
-        self.assertEqual(self.framing.decode_frame(0xC0), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_START), None)
         self.assertEqual(self.framing.decode_frame(0x01), None)
         with self.assertRaises(FramingDecodeError):
-            self.framing.decode_frame(0xC0)
+            self.framing.decode_frame(Slip.BYTE_START)
         self.assertEqual(self.framing.decode_frame(0x02), None)
         self.assertEqual(self.framing.decode_frame(0x03), None)
-        self.assertEqual(self.framing.decode_frame(0xC1), b'\x02\x03')
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_END),
+            bytes(
+                [
+                    0x02, 0x03
+                ]
+            )
+        )
 
-        self.assertEqual(self.framing.decode_frame(0xC0), None)
-        self.assertEqual(self.framing.decode_frame(0xDB), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_START), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_ESCAPE), None)
         with self.assertRaises(FramingDecodeError):
             self.framing.decode_frame(0x01)
         with self.assertRaises(FramingDecodeError):
             self.framing.decode_frame(0x02)
 
-        self.assertEqual(self.framing.decode_frame(0xC0), None)
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_START), None)
         self.assertEqual(self.framing.decode_frame(0x01), None)
-        self.assertEqual(self.framing.decode_frame(0xC1), b'\x01')
+        self.assertEqual(self.framing.decode_frame(Slip.BYTE_END),
+            bytes(
+                [
+                    0x01,
+                ]
+            )
+        )
 
     def test_json(self):
         tx_data = {'str': 'test', 'obj': {'list': [1, 2, 3], 'id': 1}}
